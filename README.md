@@ -1,2 +1,1 @@
-# OCRmyPDF-script
-Bash script for automated OCRmyPDF for given input/output directories
+# Bash script for automated OCRmyPDF for given input/output directories

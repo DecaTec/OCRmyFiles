@@ -11,8 +11,8 @@
 #	- OCRmyPDF-script.sh <inputDir> <outputDir>: using specified directories for input/output
 
 # Default input/output directories
-inputDirDefault="/mnt/LinuxShare/OCR/Input/"
-outputDirDefault="/mnt/LinuxShare/OCR/Output/"
+inputDirDefault="/mnt/LinuxShare/OCR/Input"
+outputDirDefault="/mnt/LinuxShare/OCR/Output"
 
 # General command line arguments for OCRmyPDF.
 # Modify these to fit your needs.
@@ -43,14 +43,16 @@ fi
 #
 if [ -z ${inputDir} ]
 then
-	inputDir=${inputDirDefault}   	
-	echo "No input directory given, using the default input directory ${inputDir}."
+	inputDir=${inputDirDefault}
+	echo "No input directory given, using the default input directory ${inputDir}"
+	echo
 fi
 
 if [ -z ${outputDir} ]
 then
 	outputDir=${outputDirDefault}
-	echo "No output directory given, using the default output directory ${outputDir}."
+	echo "No output directory given, using the default output directory ${outputDir}"
+	echo
 fi
 
 #
@@ -64,8 +66,9 @@ fi
 
 if [ ! -d "${outputDir}" ]
 then
-	errorecho "ERROR: The input directory ${outputDir} does not exist!"
-	exit 1
+	echo "The output directory does not exist -> creating ${outputDir}"
+	mkdir -p "${outputDir}"
+	echo
 fi
 
 #
@@ -82,19 +85,34 @@ fi
 #
 pdf=$(find ${inputDir} -type f -name "*.pdf")
 
-if [ n ${pdf} ]
+if [ ! -n "${pdf}" ]
 then 
     errorecho "ERROR: The input directory ${inputDir} does ot contain any PDF files!"
 	exit 1
 fi
 
 #
-# OCR for every PDF file in input directory
+# Function to read the input directory and OCR all contained PDFs resursively
 #
-for filename in ${inputDir}/*.pdf
-do
-	echo "Processing `basename "$filename"`..."
-	ocrmypdf ${ocrmypdfCmdArgs} "${filename}" "${outputDir}"/"`basename "$filename"`"
-	echo "Done"
-	echo
-done
+ocr_recursive() {
+    for i in "$1"/*;do
+		tmp=$(echo "$i" | sed 's:^'$inputDir'::')
+
+        if [ -d "$i" ]; then
+			mkdir -p "${outputDir}${tmp}"
+            ocr_recursive "$i"
+        elif [ -f "$i" ]; then
+			fileType="$(file -b "$i")"
+
+			if [ "${fileType%%,*}" == "PDF document" ]; then
+				# It's a PDF file -> OCR it
+				echo "Processing $i -> ${outputDir}$tmp"
+				ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
+				echo "Done"
+				echo
+			fi
+        fi
+    done
+}
+
+ocr_recursive "${inputDir}"

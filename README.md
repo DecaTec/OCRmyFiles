@@ -15,6 +15,9 @@ Adds an OCR text layer to all PDF files in the given input directory and saves t
 ## Usage
 - Download script or clone repository
 - Make script executable `sudo chmod +x OCRmyPDF-script.sh`
+- Modify the script to fit your needs:
+  - Set default input/output directories
+  - Modify the OCRmyPDF command line arguments (you can find an overview of available command line arguments [here](https://ocrmypdf.readthedocs.io/en/latest/cookbook.html))
 - Call the script:
   - `OCRmyPDF-script.sh` (no parameter): using default directories for input/output (as defined in the script itself)
   - `OCRmyPDF-script.sh <inputDir> <outputDir>`: using specified directories for input/output

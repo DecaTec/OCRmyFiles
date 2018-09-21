@@ -4,6 +4,8 @@ Bash script for automated OCRmyPDF for given input/output directories.
 
 Adds an OCR text layer to all PDF files in the given input directory and saves the new PDF files to the output directory.
 
+When the input directory also contains image files (e.g. jpg or png), these are converted to (OCR'ed) PDFs.
+
 ## Requirements
 
 - [OCRmyPDF](https://github.com/jbarlow83/OCRmyPDF)\

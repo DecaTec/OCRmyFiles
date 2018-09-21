@@ -25,8 +25,11 @@ ocrmypdfCmdArgs="-l deu+eng --output-type pdf"
 # Modify these to fit yout needs.
 # -l deu+eng: Gives a hint for tesseract which languages are contained in the image (requires the corresponding tesseract language files to be installed)
 # pdf: Ouput should be PDF
-# quiet: Supress tesseract output
-imageConvertCmdArgs="-l deu+eng pdf quiet"
+imageConvertCmdArgs="-l deu+eng pdf"
+
+countPDF=0
+countImage=0
+countCopy=0
 
 # Function for error messages
 errorecho() { cat <<< "$@" 1>&2; }
@@ -104,8 +107,15 @@ ocr_recursive() {
 				# It's a PDF file -> OCR it
 				echo "Processing (PDF) $i -> ${outputDir}${tmp}"
 				ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
+
+				if [ ! $? -eq 0 ]; then
+					# Error while processing PDF file, maybe it already contains a text layer -> simply copy to output directory
+					cp "${i}" "${outputDir}${tmp}"
+				fi
+
 				echo "Done"
 				echo
+				countPDF=$((countPDF + 1))
 			elif  [[ "${fileType}" = *"image data"* ]]; then
 				# It's an image -> convert to PDF and OCR it
 				echo "Processing (image) $i -> ${outputDir}${tmp%.*}.pdf"
@@ -113,15 +123,23 @@ ocr_recursive() {
 				tesseract "${i}" "${fullpath%.*}" ${imageConvertCmdArgs}
 				echo "Done"
 				echo
+				countImage=$((countImage + 1))
 			else
 				# Other file types -> just copy to output directory.
 				echo "Copy $i -> ${outputDir}${tmp}"
 				cp "${i}" "${outputDir}${tmp}"
 				echo "Done"
 				echo
+				countCopy=$((countCopy + 1))
 			fi
         fi
     done
 }
 
 ocr_recursive "${inputDir}"
+
+echo
+echo "Finished"
+echo "PDF files processed: ${countPDF}"
+echo "Image files processed: ${countImage}"
+echo "Other files copied: ${countCopy}"

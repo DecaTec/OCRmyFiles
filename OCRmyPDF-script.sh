@@ -92,7 +92,7 @@ fi
 #
 ocr_recursive() {
     for i in "$1"/*;do
-	tmp=$(echo "$i" | sed 's:^'$inputDir'::')
+		tmp=$(echo "$i" | sed 's:^'$inputDir'::')
 
         if [ -d "$i" ]; then
 			mkdir -p "${outputDir}${tmp}"
@@ -111,6 +111,12 @@ ocr_recursive() {
 				echo "Processing (image) $i -> ${outputDir}${tmp%.*}.pdf"
 				fullpath="${outputDir}${tmp}"				
 				tesseract "${i}" "${fullpath%.*}" ${imageConvertCmdArgs}
+				echo "Done"
+				echo
+			else
+				# Other file types -> just copy to output directory.
+				echo "Copy $i -> ${outputDir}${tmp}"
+				cp "${i}" "${outputDir}${tmp}"
 				echo "Done"
 				echo
 			fi

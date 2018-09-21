@@ -4,11 +4,13 @@
 # Requirements:
 # 	- OCRmyPDF: https://github.com/jbarlow83/OCRmyPDF
 # 		Install instructions: https://ocrmypdf.readthedocs.io/en/latest/installation.html
+#	- Tesseract: https://github.com/tesseract-ocr/
+#		This is installed with OCRmyPDF automatically
 #	- Tesseract language files
 #		e.g. "apt-get install tesseract-ocr-deu" for German language
 # Usage:
-#	- OCRmyPDF-script.sh (no parameter): using default directories for input/output
-#	- OCRmyPDF-script.sh <inputDir> <outputDir>: using specified directories for input/output
+#	- OCRmyFiles.sh (no parameter): using default directories for input/output
+#	- OCRmyFiles.sh <inputDir> <outputDir>: using specified directories for input/output
 
 # Default input/output directories
 inputDirDefault="/mnt/LinuxShare/OCR/Input"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script for OCR of all PDFs from an input directory to an output directory.
+# Script for OCR of all PDFs and images from an input directory to an output directory.
 # Requirements:
 # 	- OCRmyPDF: https://github.com/jbarlow83/OCRmyPDF
 # 		Install instructions: https://ocrmypdf.readthedocs.io/en/latest/installation.html
@@ -20,6 +20,13 @@ outputDirDefault="/mnt/LinuxShare/OCR/Output"
 # -l deu+eng: Gives a hint for OCRmyPDF which languages are contained in the PDF (requires the corresponding tesseract language files to be installed)
 # --output-type pdf: Creates a standard PDF as output (OCRmyPDF creates PDF/A documents by default)
 ocrmypdfCmdArgs="-l deu+eng --output-type pdf"
+
+# General command line arguments for tesseract calls (ONLY when converting image files to PDF).
+# Modify these to fit yout needs.
+# -l deu+eng: Gives a hint for tesseract which languages are contained in the image (requires the corresponding tesseract language files to be installed)
+# pdf: Ouput should be PDF
+# quiet: Supress tesseract output
+imageConvertCmdArgs="-l deu+eng pdf quiet"
 
 # Function for error messages
 errorecho() { cat <<< "$@" 1>&2; }
@@ -81,17 +88,6 @@ then
 fi
 
 #
-# Check if there are PDF files in input directory
-#
-pdf=$(find ${inputDir} -type f -name "*.pdf")
-
-if [ ! -n "${pdf}" ]
-then 
-    errorecho "ERROR: The input directory ${inputDir} does ot contain any PDF files!"
-	exit 1
-fi
-
-#
 # Function to read the input directory and OCR all contained PDFs resursively
 #
 ocr_recursive() {
@@ -99,18 +95,25 @@ ocr_recursive() {
 	tmp=$(echo "$i" | sed 's:^'$inputDir'::')
 
         if [ -d "$i" ]; then
-		mkdir -p "${outputDir}${tmp}"
-		ocr_recursive "$i"
+			mkdir -p "${outputDir}${tmp}"
+			ocr_recursive "$i"
         elif [ -f "$i" ]; then
-		fileType="$(file -b "$i")"
-		
-		if [ "${fileType%%,*}" == "PDF document" ]; then
-			# It's a PDF file -> OCR it
-			echo "Processing $i -> ${outputDir}$tmp"
-			ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
-			echo "Done"
-			echo
-		fi
+			fileType="$(file -b "$i")"
+
+			if [ "${fileType%%,*}" == "PDF document" ]; then
+				# It's a PDF file -> OCR it
+				echo "Processing (PDF) $i -> ${outputDir}${tmp}"
+				ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
+				echo "Done"
+				echo
+			elif  [[ "${fileType}" = *"image data"* ]]; then
+				# It's an image -> convert to PDF and OCR it
+				echo "Processing (image) $i -> ${outputDir}${tmp%.*}.pdf"
+				fullpath="${outputDir}${tmp}"				
+				tesseract "${i}" "${fullpath%.*}" ${imageConvertCmdArgs}
+				echo "Done"
+				echo
+			fi
         fi
     done
 }

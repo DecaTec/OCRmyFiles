@@ -96,21 +96,21 @@ fi
 #
 ocr_recursive() {
     for i in "$1"/*;do
-		tmp=$(echo "$i" | sed 's:^'$inputDir'::')
+	tmp=$(echo "$i" | sed 's:^'$inputDir'::')
 
         if [ -d "$i" ]; then
-			mkdir -p "${outputDir}${tmp}"
-            ocr_recursive "$i"
+		mkdir -p "${outputDir}${tmp}"
+		ocr_recursive "$i"
         elif [ -f "$i" ]; then
-			fileType="$(file -b "$i")"
-
-			if [ "${fileType%%,*}" == "PDF document" ]; then
-				# It's a PDF file -> OCR it
-				echo "Processing $i -> ${outputDir}$tmp"
-				ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
-				echo "Done"
-				echo
-			fi
+		fileType="$(file -b "$i")"
+		
+		if [ "${fileType%%,*}" == "PDF document" ]; then
+			# It's a PDF file -> OCR it
+			echo "Processing $i -> ${outputDir}$tmp"
+			ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
+			echo "Done"
+			echo
+		fi
         fi
     done
 }

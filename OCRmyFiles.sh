@@ -138,7 +138,9 @@ ocr_recursive() {
     done
 }
 
+shopt -s dotglob
 ocr_recursive "${inputDir}"
+shopt -u dotglob
 
 echo
 echo "Finished"

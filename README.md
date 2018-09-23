@@ -1,6 +1,6 @@
 # OCRmyFiles
 
-Bash script for adding a text layer to different file types (PDF, images) with given input/output directories.
+Bash script for adding a text layer to PDF files and converting images in PDFs (with OCR).
 
 Adds an OCR text layer to all __PDF files__ in the given input directory and saves the new PDF files to the output directory.
 

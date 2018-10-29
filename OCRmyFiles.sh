@@ -84,15 +84,6 @@ then
 fi
 
 #
-# Check if output directory is empty
-#
-if [ "$(ls -A "${outputDir}")" ]
-then
-    errorecho "ERROR: The output directory ${outputDir} is not empty!"
-	exit 1
-fi
-
-#
 # Function to read the input directory and OCR all contained PDFs resursively
 #
 ocr_recursive() {

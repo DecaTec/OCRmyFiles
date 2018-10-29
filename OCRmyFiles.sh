@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script for OCR of all PDFs and images from an input directory to an output directory.
+# Bash script for adding a text layer to PDF files and converting images in PDFs (with OCR).
 # Requirements:
 # 	- OCRmyPDF: https://github.com/jbarlow83/OCRmyPDF
 # 		Install instructions: https://ocrmypdf.readthedocs.io/en/latest/installation.html

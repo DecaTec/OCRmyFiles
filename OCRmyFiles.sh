@@ -84,17 +84,44 @@ then
 fi
 
 #
+# Locking
+#
+# The script should only run in one instance per input directory.
+# So the lock directory is saved in the input directory, not under /var/lock
+lockdir="${inputDir}/ocrmyfiles.lock"
+
+if mkdir "$lockdir" 
+then
+     # Remove lockdir when the script finishes
+     trap 'rm -rf "$lockdir"' 0
+else
+     errorecho "Script is currently running for input directory ${inputDir}, aborting..."
+     exit 1
+fi
+
+#
 # Function to read the input directory and OCR all contained PDFs resursively
 #
 ocr_recursive() {
     for i in "$1"/*;do
 		tmp=$(echo "$i" | sed 's:^'$inputDir'::')
 
+		# Skip lock directory
+		if  [ $i = $lockdir ]; then
+			continue
+		fi
+
         if [ -d "$i" ]; then
 			mkdir -p "${outputDir}${tmp}"
 			ocr_recursive "$i"
         elif [ -f "$i" ]; then
 			fileType="$(file -b "$i")"
+
+			if [ -f "${outputDir}${tmp%.*}.pdf" ]; then
+				# If the file already exist in the output directory, skip it.
+				echo "File ${outputDir}${tmp%.*}.pdf already exists, skipping..."
+				continue
+			fi
 
 			if [ "${fileType%%,*}" == "PDF document" ]; then
 				# It's a PDF file -> OCR it

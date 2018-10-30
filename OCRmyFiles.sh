@@ -88,16 +88,27 @@ fi
 #
 # The script should only run in one instance per input directory.
 # So the lock directory is saved in the input directory, not under /var/lock
+# Create a "lock" directory also in output directory to indicate that the script is currently running
 lockdir="${inputDir}/ocrmyfiles.lock"
+runningdir="${outputDir}/ocrmyfiles_running.lock"
 
 if mkdir "$lockdir" 
 then
      # Remove lockdir when the script finishes
-     trap 'rm -rf "$lockdir"' 0
+     trap cleanup 0
 else
      errorecho "Script is currently running for input directory ${inputDir}, aborting..."
      exit 1
 fi
+
+# Create a "lock" directory in output directory to indicate that the script is currently running
+runningdir="${outputDir}/ocrmyfiles_running.lock"
+mkdir "$runningdir"
+
+function cleanup {
+	rm -rf "$lockdir"
+	rm -rf "$runningdir"
+}
 
 #
 # Function to read the input directory and OCR all contained PDFs resursively

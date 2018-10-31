@@ -29,3 +29,7 @@ All __other file types__ are just copied from the input directory to the output 
   - `OCRmyFiles.sh` (no parameter): using default directories for input/output (as defined in the script itself)
   - `OCRmyFiles.sh <inputDir> <outputDir>`: using specified directories for input/output
 - The script might print some warnings/errors from Tesseract. These can be ignored in most cases as the OCR text layer will be created anyway
+- You can also call this script with a cronjob for automated processing of PDFs/images:
+    - With the user the cronjob should be executed, call `contab -e`
+    - Add the following to run the script e.g. every 30 minutes: `*/30  *  *  *  * /path/to/the/script/OCRmyFiles.sh > /dev/null 2>&1
+`

@@ -118,7 +118,7 @@ ocr_recursive() {
 		tmp=$(echo "$i" | sed 's:^'$inputDir'::')
 
 		# Skip lock directory
-		if  [ $i = $lockdir ]; then
+		if  [ "$i" = "$lockdir" ]; then
 			continue
 		fi
 

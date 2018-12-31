@@ -11,6 +11,9 @@
 # Usage:
 #	- OCRmyFiles.sh (no parameter): using default directories for input/output
 #	- OCRmyFiles.sh <inputDir> <outputDir>: using specified directories for input/output
+#
+# Remarks:
+# 	- After OCR, all files from the input directory are deleted. If you want to keep the input files, just comment out the call of the function 'cleanup_inputDir' at the end of the script.
 
 # Default input/output directories
 inputDirDefault="/mnt/LinuxShare/OCR/Input"
@@ -95,7 +98,7 @@ runningdir="${outputDir}/ocrmyfiles_running.lock"
 if mkdir "$lockdir" 
 then
      # Remove lockdir when the script finishes
-     trap cleanup 0
+     trap cleanup_locks 0
 else
      errorecho "Script is currently running for input directory ${inputDir}, aborting..."
      exit 1
@@ -105,9 +108,15 @@ fi
 runningdir="${outputDir}/ocrmyfiles_running.lock"
 mkdir "$runningdir"
 
-function cleanup {
+# Function to clean up locks
+function cleanup_locks {
 	rm -rf "$lockdir"
 	rm -rf "$runningdir"
+}
+
+# Function to clean up the input directory
+function cleanup_inputDir {
+        rm -rf "${inputDir}"/*
 }
 
 #
@@ -115,7 +124,7 @@ function cleanup {
 #
 ocr_recursive() {
     for i in "$1"/*;do
-		tmp=$(echo "$i" | sed 's:^'$inputDir'::')
+		tmp=$(echo "$i" | sed 's:^'"$inputDir"'::')
 
 		# Skip lock directory
 		if  [ "$i" = "$lockdir" ]; then
@@ -169,6 +178,7 @@ ocr_recursive() {
 
 shopt -s dotglob
 ocr_recursive "${inputDir}"
+cleanup_inputDir
 shopt -u dotglob
 
 echo

@@ -16,8 +16,8 @@
 # 	- After OCR, all files from the input directory are deleted. If you want to keep the input files, just comment out the call of the function 'cleanup_inputDir' at the end of the script.
 
 # Default input/output directories
-inputDirDefault="/mnt/LinuxShare/OCR/Input"
-outputDirDefault="/mnt/LinuxShare/OCR/Output"
+inputDirDefault="/var/OCR/Input"
+outputDirDefault="/var/OCR/Output"
 
 # General command line arguments for OCRmyPDF.
 # Modify these to fit your needs.
@@ -54,16 +54,26 @@ then
 fi
 
 #
+# Check if OCRmyPDF is available
+#
+if ! hash ocrmypdf 2>/dev/null;
+then
+    errorecho "ERROR: OCRmyPDF is not available!"
+	errorecho "Is OCRmyPDF installed?"
+    exit 1
+fi
+
+#
 # Use default directories if none were specified
 #
-if [ -z ${inputDir} ]
+if [ -z "${inputDir}" ]
 then
 	inputDir=${inputDirDefault}
 	echo "No input directory given, using the default input directory ${inputDir}"
 	echo
 fi
 
-if [ -z ${outputDir} ]
+if [ -z "${outputDir}" ]
 then
 	outputDir=${outputDirDefault}
 	echo "No output directory given, using the default output directory ${outputDir}"
@@ -92,10 +102,10 @@ fi
 # The script should only run in one instance per input directory.
 # So the lock directory is saved in the input directory, not under /var/lock
 # Create a "lock" directory also in output directory to indicate that the script is currently running
-lockdir="${inputDir}/ocrmyfiles.lock"
-runningdir="${outputDir}/ocrmyfiles_running.lock"
+lockdir="${inputDir}/.ocrmyfiles.lock"
+runningdir="${outputDir}/.ocrmyfiles_running.lock"
 
-if mkdir "$lockdir" 
+if mkdir "$lockdir"
 then
      # Remove lockdir when the script finishes
      trap cleanup_locks 0
@@ -105,7 +115,7 @@ else
 fi
 
 # Create a "lock" directory in output directory to indicate that the script is currently running
-runningdir="${outputDir}/ocrmyfiles_running.lock"
+runningdir="${outputDir}/.ocrmyfiles_running.lock"
 mkdir "$runningdir"
 
 # Function to clean up locks
@@ -116,7 +126,7 @@ function cleanup_locks {
 
 # Function to clean up the input directory
 function cleanup_inputDir {
-        rm -rf "${inputDir}"/*
+        rm -rf "${inputDir:?}"/*
 }
 
 #
@@ -124,7 +134,7 @@ function cleanup_inputDir {
 #
 ocr_recursive() {
     for i in "$1"/*;do
-		tmp=$(echo "$i" | sed 's:^'"$inputDir"'::')
+		tmp="${i//"$inputDir"/""}"
 
 		# Skip lock directory
 		if  [ "$i" = "$lockdir" ]; then
@@ -146,9 +156,9 @@ ocr_recursive() {
 			if [ "${fileType%%,*}" == "PDF document" ]; then
 				# It's a PDF file -> OCR it
 				echo "Processing (PDF) $i -> ${outputDir}${tmp}"
-				ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
 
-				if [ ! $? -eq 0 ]; then
+				if ! ocrmypdf ${ocrmypdfCmdArgs} "${i}" "${outputDir}${tmp}"
+				then
 					# Error while processing PDF file, maybe it already contains a text layer -> simply copy to output directory
 					cp "${i}" "${outputDir}${tmp}"
 				fi
@@ -159,7 +169,7 @@ ocr_recursive() {
 			elif  [[ "${fileType}" = *"image data"* ]]; then
 				# It's an image -> convert to PDF and OCR it
 				echo "Processing (image) $i -> ${outputDir}${tmp%.*}.pdf"
-				fullpath="${outputDir}${tmp}"				
+				fullpath="${outputDir}${tmp}"
 				tesseract "${i}" "${fullpath%.*}" ${imageConvertCmdArgs}
 				echo "Done"
 				echo

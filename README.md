@@ -1,3 +1,5 @@
+**Archived, moved to Codeberg: https://codeberg.org/DecaTec/OCRmyFiles**
+
 # OCRmyFiles
 
 Bash script for adding a text layer to PDF files and converting images in PDFs (with OCR).

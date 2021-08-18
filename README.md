@@ -1,4 +1,6 @@
-**Archived, moved to Codeberg: https://codeberg.org/DecaTec/OCRmyFiles**
+### ⚠️ Archived, moved to Codeberg: https://codeberg.org/DecaTec/OCRmyFiles ⚠️
+
+Thus, this GitHub repository is **outdated** and **not longer maintained on GitHub**. Please update your references.
 
 # OCRmyFiles
 
